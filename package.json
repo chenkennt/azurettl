@@ -1,0 +1,18 @@
+{
+  "name": "azurettl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@azure/arm-resources": "^3.0.0",
+    "@azure/arm-subscriptions": "^2.0.0",
+    "@azure/ms-rest-nodeauth": "^3.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
