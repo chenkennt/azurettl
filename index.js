@@ -36,7 +36,7 @@ async function doCleanup(client, secret, subsId, subsName, tenant, ttl) {
         try {
             stats.toDeleteResources++;
             console.log(`  Created ${daysCreate} day(s) days ago, deleting...`);
-            // await deleteResourceById(resourceClient, r.type, r.id);
+            await deleteResourceById(resourceClient, r.type, r.id);
             console.log('  Deleted.');
             stats.deletedResources++;
         } catch (err) {
@@ -63,7 +63,7 @@ async function doCleanup(client, secret, subsId, subsName, tenant, ttl) {
             try {
                 stats.toDeleteGroups++;
                 console.log('  No resources in this group, deleting...');
-                // await resourceClient.resourceGroups.deleteMethod(g);
+                await resourceClient.resourceGroups.deleteMethod(g);
                 console.log('  Deleted');
                 stats.deletedGroups++;
             } catch (err) {
