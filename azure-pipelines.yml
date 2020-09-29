@@ -6,10 +6,6 @@
 trigger:
 - master
 
-variables:
-- name: name
-  value: world
-
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -21,5 +17,5 @@ steps:
 
 - script: |
     npm install
-    npm start $(name)
+    npm start $(subsId) $(subsName) $(ttl) $(clientId) $(clientSecret) $(tenantId)
   displayName: 'npm install and start'
