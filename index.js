@@ -94,4 +94,5 @@ const subscriptionId = '***';
 const subscriptionName = '***';
 const tenantId = '***';
 const TTL = 7;
-doCleanup(clientId, clientSecret, subscriptionId, subscriptionName, tenantId, TTL).catch(console.log);
+// doCleanup(clientId, clientSecret, subscriptionId, subscriptionName, tenantId, TTL).catch(console.log);
+console.log('hello world');
