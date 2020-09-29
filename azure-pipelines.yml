@@ -6,10 +6,6 @@
 trigger:
 - master
 
-variables:
-- name: name
-  value: world
-
 pool:
   vmImage: 'ubuntu-latest'
 
