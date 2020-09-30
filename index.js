@@ -3,7 +3,7 @@ const armResources = require('@azure/arm-resources');
 const armSubscriptions = require('@azure/arm-subscriptions');
 const { daysAgo, deleteResourceById, listResources, listResourcesOnResourceGroup, listResourceGroups } = require("./utils");
 const { Environment } = require("@azure/ms-rest-azure-env");
-async function doCleanup(subsId, subsName, ttl, client, secret, tenant) {
+async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, tenant) {
   let cred = await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
     environment: Environment.AzureCloud
   });
@@ -26,10 +26,19 @@ async function doCleanup(subsId, subsName, ttl, client, secret, tenant) {
   };
 
   let now = new Date();
+  let exclude = excludeList.split(',');
   // delete newly created resources first to solve dependency issues
   for (let r of resources.sort((x, y) => y.createdTime - x.createdTime)) {
-    let daysCreate = daysAgo(r.createdTime);
     console.log(`Processing ${r.id}`);
+
+    let ids = r.id.split('/');
+    let group = ids[4];
+    if (exclude.indexOf(group) >= 0) {
+      console.log('  In exclude list, skip.');
+      continue;
+    }
+
+    let daysCreate = daysAgo(r.createdTime);
     if (daysCreate <= ttl) {
       console.log(`  Created ${daysCreate} day(s) ago, skip.`);
       continue;
@@ -94,8 +103,9 @@ async function doCleanup(subsId, subsName, ttl, client, secret, tenant) {
 const subscriptionId = process.argv[2];
 const subscriptionName = process.argv[3];
 const ttl = process.argv[4];
-const clientId = process.argv[5];
-const clientSecret = process.argv[6];
-const tenantId = process.argv[7];
+const excludeList = process.argv[5];
+const clientId = process.argv[6];
+const clientSecret = process.argv[7];
+const tenantId = process.argv[8];
 
-doCleanup(subscriptionId, subscriptionName, ttl, clientId, clientSecret, tenantId).catch(console.log);
+doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);
