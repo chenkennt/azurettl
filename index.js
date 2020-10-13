@@ -97,7 +97,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
 
   // fail the program if any delete failed
-  if (stats.toDeleteResources !== stats.deletedGroups || stats.toDeleteResources !== stats.deletedGroups) process.exitCode = 1;
+  if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
 }
 
 const subscriptionId = process.argv[2];
