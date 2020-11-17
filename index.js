@@ -116,6 +116,6 @@ const clientId = process.argv[6];
 const clientSecret = process.argv[7];
 const tenantId = process.argv[8];
 
-console.log('##[warning]this is a warning');
+process.exitCode = 1;
 
 //doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);

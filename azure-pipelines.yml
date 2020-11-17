@@ -16,3 +16,4 @@ steps:
     npm install
     npm start $(subsId) $(subsName) $(ttl) $(excludeList) $(clientId) $(clientSecret) $(tenantId)
   displayName: 'npm install and start'
+  continueOnError: 'true'
