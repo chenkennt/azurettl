@@ -52,7 +52,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
       console.log('  Deleted.');
       stats.deletedResources++;
     } catch (err) {
-      console.log(`##vso[task.logissue type=warning]Failed to delete resource due to ${err.code | 'Unknown'}: ${r.id}`);
+      console.log(`##vso[task.logissue type=warning]Failed to delete resource due to ${err.code || 'Unknown'}: ${r.id}`);
       if (err.statusCode) {
         console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
         console.log('    ' + (err.body.message || err.body.Message));
@@ -79,7 +79,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
         console.log('  Deleted');
         stats.deletedGroups++;
       } catch (err) {
-        console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${err.code | 'Unknown'}: ${g}`);
+        console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${err.code || 'Unknown'}: ${g}`);
         if (err.statusCode) {
           console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
           console.log('    ' + (err.body.message || err.body.Message));

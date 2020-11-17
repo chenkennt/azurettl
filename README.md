@@ -26,7 +26,7 @@ This will delete all resources that are created before `ttl_in_days` days ago.
    1. Disable continuous integration and pull request validation
    1. Add schedules as you like
 
-Then the pipeline will run periodically to cleanup the resources. If some resources failed to delete, pipeline will succeed with a warning, go to the details of the run and you will see failed resources in the warning tab. Detailed reasons can be found in the raw log.
+Then the pipeline will run periodically to cleanup the resources. If some resources failed to delete, pipeline will succeed with a warning, go to the details of the run and you will see failed resources and failed reasons in the warning tab. Detailed error messages can be found in the raw log.
 
 ## Known issues
 
