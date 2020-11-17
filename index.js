@@ -119,4 +119,7 @@ const clientId = process.argv[6];
 const clientSecret = process.argv[7];
 const tenantId = process.argv[8];
 
-doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);
+doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(ex => {
+  console.log(ex);
+  process.exitCode = 1;
+});
