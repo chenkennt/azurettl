@@ -103,16 +103,8 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
   console.log(`  Following resources are in the exclude list:`);
   excludedResources.forEach(r => console.log(`    ${r}`));
-  if (failedResources.length > 0) {
-    let message = 'Following resources failed to delete:\n';
-    failedResources.forEach(r => message += `  ${r}\n`);
-    console.log(`##vso[task.logissue type=warning]${message}`);
-  }
-  if (failedGroups.length > 0) {
-    let message = 'Following resource groups failed to delete:\n';
-    failedGroups.forEach(r => message += `  ${r}\n`);
-    console.log(`##vso[task.logissue type=warning]${message}`);
-  }
+  failedResources.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource ${r}`));
+  failedGroups.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource group ${r}`));
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
