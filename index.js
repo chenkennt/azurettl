@@ -53,7 +53,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
       console.log('  Deleted.');
       stats.deletedResources++;
     } catch (err) {
-      failedResources.push(r.id);
+      failedResources.push({ id: r.id, code: err.code });
       if (err.statusCode) {
         console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
         console.log('    ' + (err.body.message || err.body.Message));
@@ -81,7 +81,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
         console.log('  Deleted');
         stats.deletedGroups++;
       } catch (err) {
-        failedGroups.push(g);
+        failedGroups.push({ id: g, code: err.code });
         if (err.statusCode) {
           console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
           console.log('    ' + (err.body.message || err.body.Message));
@@ -103,11 +103,16 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
   console.log(`  Following resources are in the exclude list:`);
   excludedResources.forEach(r => console.log(`    ${r}`));
-  failedResources.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource ${r}`));
-  failedGroups.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource group ${r}`));
+  failedResources.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource due to ${r.code | 'Unknown'}: ${r.id}`));
+  failedGroups.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${r.code | 'Unknown'} ${r.id}`));
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
+}
+
+if (process.argv.length < 9) {
+  console.log("Usage: node index.js <subscription_id> <subscription_name> <ttl_in_day> <exclude_list> <client_id> <client_secret> <tenant_id>");
+  return 1;
 }
 
 const subscriptionId = process.argv[2];
