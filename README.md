@@ -19,7 +19,7 @@ This will delete all resources that are created before `ttl_in_days` days ago.
    1. Choose "Existing Azure Pipelines YAML file"
    1. Choose [azure-pipelines.yml](azure-pipelines.yml)
    1. Click "Variables"
-   1. Add all 7 variables: `subsId` `subsName` `ttl` `excludeList` `clientId` `clientSecret` `tenantId`
+   1. Add 7 variables: `subsId` `subsName` `ttl` `excludeList` `clientId` `clientSecret` `tenantId`
    1. Save
 1. Setup schedule
    1. Go to triggers
@@ -35,3 +35,4 @@ Then the pipeline will run periodically to cleanup the resources. If some resour
 Some known issues that may cause deletion to fail:
 
 1. Resources may have dependencies (for example, app service plan may be used by app service so cannot be deleted before app service is deleted), current solution is to delete the resources by their creation date (usually newly created resources depend on old resources) but it cannot handle all cases. It is not a big issue as resources will eventually be deleted after the script runs for several times (unless there is a circular dependency which I haven't found any so far).
+2. If there're too many resources to delete the script will run more than one hour which exceeds the time limit of Azure DevOps. Again this can be mitigated by running the script for multiple times. May be able to improve by running delete operations asynchronously.
