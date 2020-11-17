@@ -27,6 +27,8 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
 
   let now = new Date();
   let exclude = excludeList.split(',');
+  let failedResources = [];
+  let excludedResources = [];
   // delete newly created resources first to solve dependency issues
   for (let r of resources.sort((x, y) => y.createdTime - x.createdTime)) {
     console.log(`Processing ${r.id}`);
@@ -34,6 +36,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
     let ids = r.id.split('/');
     let group = ids[4];
     if (exclude.indexOf(group) >= 0) {
+      excludedResources.push(r.id);
       console.log('  In exclude list, skip.');
       continue;
     }
@@ -50,6 +53,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
       console.log('  Deleted.');
       stats.deletedResources++;
     } catch (err) {
+      failedResources.push(r.id);
       if (err.statusCode) {
         console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
         console.log('    ' + (err.body.message || err.body.Message));
@@ -95,6 +99,10 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group can be deleted: ${stats.toDeleteGroups}`);
   console.log(`  Resource group deleted: ${stats.deletedGroups}`);
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
+  console.log(`  Following resources are in the exclude list:`);
+  excludedResources.forEach(r => console.log(`  ${r}`));
+  console.log(`  Following resources failed to delete:`);
+  failedResources.forEach(r => console.log(`  ${r}`));
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
