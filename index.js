@@ -64,6 +64,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   }
 
   // delete empty groups
+  let failedGroups = [];
   for (let rg of (await listResourceGroups(resourceClient))) {
     const g = rg.name;
     stats.totalGroups++;
@@ -80,6 +81,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
         console.log('  Deleted');
         stats.deletedGroups++;
       } catch (err) {
+        failedGroups.push(g);
         if (err.statusCode) {
           console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
           console.log('    ' + (err.body.message || err.body.Message));
@@ -101,8 +103,16 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
   console.log(`  Following resources are in the exclude list:`);
   excludedResources.forEach(r => console.log(`    ${r}`));
-  console.log(`  Following resources failed to delete:`);
-  failedResources.forEach(r => console.log(`    ${r}`));
+  if (failedResources.length > 0) {
+    let message = 'Following resources failed to delete:\n';
+    failedResources.forEach(r => message += `  ${r}\n`);
+    console.log(`##vso[task.logissue type=warning]${message}`);
+  }
+  if (failedGroups.length > 0) {
+    let message = 'Following resource groups failed to delete:\n';
+    failedGroups.forEach(r => message += `  ${r}\n`);
+    console.log(`##vso[task.logissue type=warning]${message}`);
+  }
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
@@ -115,7 +125,5 @@ const excludeList = process.argv[5];
 const clientId = process.argv[6];
 const clientSecret = process.argv[7];
 const tenantId = process.argv[8];
-
-console.log('##vso[task.logissue type=warning]this is a warning');
 
 //doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);
