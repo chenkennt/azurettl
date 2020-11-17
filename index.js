@@ -108,7 +108,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
 
 if (process.argv.length < 9) {
   console.log("Usage: node index.js <subscription_id> <subscription_name> <ttl_in_day> <exclude_list> <client_id> <client_secret> <tenant_id>");
-  return 1;
+  process.exitCode = 1;
 }
 
 const subscriptionId = process.argv[2];
