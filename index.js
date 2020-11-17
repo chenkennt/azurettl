@@ -53,6 +53,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
       console.log('  Deleted.');
       stats.deletedResources++;
     } catch (err) {
+      console.log(err.code);
       failedResources.push({ id: r.id, code: err.code });
       if (err.statusCode) {
         console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
@@ -104,7 +105,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Following resources are in the exclude list:`);
   excludedResources.forEach(r => console.log(`    ${r}`));
   failedResources.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource due to ${r.code | 'Unknown'}: ${r.id}`));
-  failedGroups.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${r.code | 'Unknown'} ${r.id}`));
+  failedGroups.forEach(r => console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${r.code | 'Unknown'}: ${r.id}`));
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
