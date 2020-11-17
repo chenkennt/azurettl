@@ -100,9 +100,9 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   console.log(`  Resource group deleted: ${stats.deletedGroups}`);
   console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
   console.log(`  Following resources are in the exclude list:`);
-  excludedResources.forEach(r => console.log(`  ${r}`));
+  excludedResources.forEach(r => console.log(`    ${r}`));
   console.log(`  Following resources failed to delete:`);
-  failedResources.forEach(r => console.log(`  ${r}`));
+  failedResources.forEach(r => console.log(`    ${r}`));
 
   // fail the program if any delete failed
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
@@ -116,4 +116,6 @@ const clientId = process.argv[6];
 const clientSecret = process.argv[7];
 const tenantId = process.argv[8];
 
-doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);
+console.log('##[warning]this is a warning');
+
+//doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(console.log);
