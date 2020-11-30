@@ -1,20 +1,24 @@
-const { Environment } = require("@azure/ms-rest-azure-env");
+const { Environment } = require('@azure/ms-rest-azure-env');
 const msRestNodeAuth = require('@azure/ms-rest-nodeauth');
 const armResources = require('@azure/arm-resources');
 const armSubscriptions = require('@azure/arm-subscriptions');
-const { daysAgo, deleteResourceById, listResources, listResourcesOnResourceGroup, listResourceGroups } = require("./utils");
+const { daysAgo, deleteResourceById, listResources, listResourcesOnResourceGroup, listResourceGroups } = require('./utils');
 const ResourceCleaner = require('./resourceCleaner');
 
 async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, tenant) {
-  let cred = await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
+  let cred = !client && !secret && !tenant ? await msRestNodeAuth.interactiveLogin() : await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
     environment: Environment.AzureCloud
   });
+  doCleanupCore(subsId, subsName, ttl, excludeList, cred);
+}
+
+async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
 
   // do a subscription check first, to ensure resources doesn't get cleaned up by accident
   let subscriptionClient = new armSubscriptions.SubscriptionClient(cred);
   let sub = await subscriptionClient.subscriptions.get(subsId);
   if (sub.displayName !== subsName) throw `Subscription does not match! Expected subscription: ${subsName}, actual subscription: ${sub.displayName}`;
-  let cleaner = new ResourceCleaner(cred, subId);
+  let cleaner = new ResourceCleaner(cred, subsId);
 
   console.log(`Start cleaning resources in subscription: ${subsName} (${subsId}), delete resources created over ${ttl} days.`);
   let resourceClient = new armResources.ResourceManagementClient(cred, subsId);
@@ -51,7 +55,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
     try {
       stats.toDeleteResources++;
       console.log(`  Created ${daysCreate} day(s) days ago, deleting...`);
-      await cleaner.cleanup(r.type, group, r.name);
+      await cleaner.cleanup(group, r.type, r.name);
       await deleteResourceById(resourceClient, r.type, r.id);
       console.log('  Deleted.');
       stats.deletedResources++;
@@ -110,9 +114,11 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
 }
 
-if (process.argv.length < 9) {
-  console.log("Usage: node index.js <subscription_id> <subscription_name> <ttl_in_day> <exclude_list> <client_id> <client_secret> <tenant_id>");
+if (process.argv.length < 6) {
+  console.log('Usage: node index.js <subscription_id> <subscription_name> <ttl_in_day> <exclude_list> [<client_id> <client_secret> <tenant_id>]');
+  console.log('  client_id, client_secret and tenant_id can be omitted, if so interactive login will be used')
   process.exitCode = 1;
+  return;
 }
 
 const subscriptionId = process.argv[2];
