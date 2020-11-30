@@ -117,14 +117,14 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
   excludedResources.forEach(r => console.log(`    ${r}`));
 
   // fail the program if any delete failed
-  if (stats.toDeleteResources !== stats.deletedResources + stats.lockedResources || stats.toDeleteGroups !== stats.deletedGroups + stats.lockedGroups) process.exitCode = 400;
-  else if (stats.lockedResources !== 0 || stats.lockedGroups) process.exitCode = 409;
+  if (stats.toDeleteResources !== stats.deletedResources + stats.lockedResources || stats.toDeleteGroups !== stats.deletedGroups + stats.lockedGroups) process.exitCode = 10;
+  else if (stats.lockedResources !== 0 || stats.lockedGroups) process.exitCode = 11;
 }
 
 if (process.argv.length < 6) {
   console.log('Usage: node index.js <subscription_id> <subscription_name> <ttl_in_day> <exclude_list> [<client_id> <client_secret> <tenant_id>]');
   console.log('  client_id, client_secret and tenant_id can be omitted, if so interactive login will be used')
-  process.exitCode = 1;
+  process.exitCode = 2;
   return;
 }
 
@@ -138,5 +138,5 @@ const tenantId = process.argv[8];
 
 doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(ex => {
   console.log(ex);
-  process.exitCode = 500;
+  process.exitCode = 1;
 });

@@ -15,13 +15,13 @@ This will delete all resources that are created before `ttl_in_days` days ago.
 
 Exit code:
 
-|     | |
-|-----|---------
-| 0   | Success
-| 1   | Bad command line parameters
-| 409 | Some resources are locked
-| 400 | Some resources cannot be deleted (other than locked)
-| 500 | All other errors
+| Code | Meaning
+|------|---------
+| 0    | Success
+| 2    | Bad command line parameters
+| 11   | Some resources are locked
+| 10   | Some resources cannot be deleted (other than locked)
+| 1    | All other errors
 
 ## Run in Azure DevOps
 
