@@ -1,8 +1,10 @@
+const { Environment } = require("@azure/ms-rest-azure-env");
 const msRestNodeAuth = require('@azure/ms-rest-nodeauth');
 const armResources = require('@azure/arm-resources');
 const armSubscriptions = require('@azure/arm-subscriptions');
 const { daysAgo, deleteResourceById, listResources, listResourcesOnResourceGroup, listResourceGroups } = require("./utils");
-const { Environment } = require("@azure/ms-rest-azure-env");
+const ResourceCleaner = require('./resourceCleaner');
+
 async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, tenant) {
   let cred = await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
     environment: Environment.AzureCloud
@@ -12,6 +14,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
   let subscriptionClient = new armSubscriptions.SubscriptionClient(cred);
   let sub = await subscriptionClient.subscriptions.get(subsId);
   if (sub.displayName !== subsName) throw `Subscription does not match! Expected subscription: ${subsName}, actual subscription: ${sub.displayName}`;
+  let cleaner = new ResourceCleaner(cred, subId);
 
   console.log(`Start cleaning resources in subscription: ${subsName} (${subsId}), delete resources created over ${ttl} days.`);
   let resourceClient = new armResources.ResourceManagementClient(cred, subsId);
@@ -48,6 +51,7 @@ async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, ten
     try {
       stats.toDeleteResources++;
       console.log(`  Created ${daysCreate} day(s) days ago, deleting...`);
+      await cleaner.cleanup(r.type, group, r.name);
       await deleteResourceById(resourceClient, r.type, r.id);
       console.log('  Deleted.');
       stats.deletedResources++;
