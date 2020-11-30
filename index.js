@@ -6,10 +6,15 @@ const { daysAgo, deleteResourceById, listResources, listResourcesOnResourceGroup
 const ResourceCleaner = require('./resourceCleaner');
 
 async function doCleanup(subsId, subsName, ttl, excludeList, client, secret, tenant) {
-  let cred = !client && !secret && !tenant ? await msRestNodeAuth.interactiveLogin() : await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
-    environment: Environment.AzureCloud
-  });
-  doCleanupCore(subsId, subsName, ttl, excludeList, cred);
+  try {
+    let cred = !client && !secret && !tenant ? await msRestNodeAuth.interactiveLogin() : await msRestNodeAuth.loginWithServicePrincipalSecret(client, secret, tenant, {
+      environment: Environment.AzureCloud
+    });
+    doCleanupCore(subsId, subsName, ttl, excludeList, cred);
+  } catch (ex) {
+    console.log(ex);
+    process.exitCode = 1;
+  }
 }
 
 async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
@@ -136,7 +141,4 @@ const clientId = process.argv[6];
 const clientSecret = process.argv[7];
 const tenantId = process.argv[8];
 
-doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(ex => {
-  console.log(ex);
-  process.exitCode = 1;
-});
+doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId);
