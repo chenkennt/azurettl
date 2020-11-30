@@ -13,6 +13,16 @@ This will delete all resources that are created before `ttl_in_days` days ago.
 
 > `client_id`, `client_secret` and `tenant_id` can be omitted. If so interactive login will be used, you can use this way to test the tool in your local machine.
 
+Exit code:
+
+|     | |
+|-----|---------
+| 0   | Success
+| 1   | Bad command line parameters
+| 409 | Some resources are locked
+| 400 | Some resources cannot be deleted (other than locked)
+| 500 | All other errors
+
 ## Run in Azure DevOps
 
 1. Create pipeline

@@ -27,9 +27,11 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
     totalResources: resources.length,
     toDeleteResources: 0,
     deletedResources: 0,
+    lockedResources: 0,
     totalGroups: 0,
     toDeleteGroups: 0,
-    deletedGroups: 0
+    deletedGroups: 0,
+    lockedGroups: 0
   };
 
   let now = new Date();
@@ -61,6 +63,7 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
       stats.deletedResources++;
     } catch (err) {
       console.log(`##vso[task.logissue type=warning]Failed to delete resource due to ${err.code || 'Unknown'}: ${r.id}`);
+      if (err.code === 'ScopeLocked') stats.lockedResources++;
       if (err.statusCode) {
         console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
         console.log('    ' + (err.body.message || err.body.Message));
@@ -88,6 +91,7 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
         stats.deletedGroups++;
       } catch (err) {
         console.log(`##vso[task.logissue type=warning]Failed to delete resource group due to ${err.code || 'Unknown'}: ${g}`);
+        if (err.code === 'ScopeLocked') stats.lockedGroups++;
         if (err.statusCode) {
           console.log(`  Failed. HTTP status code: ${err.statusCode}, error code: ${err.code}, error message:`);
           console.log('    ' + (err.body.message || err.body.Message));
@@ -102,16 +106,19 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
   console.log(`  Resource processed: ${stats.totalResources}`);
   console.log(`  Resource can be deleted: ${stats.toDeleteResources}`);
   console.log(`  Resource deleted: ${stats.deletedResources}`);
-  console.log(`  Resource failed to delete: ${stats.toDeleteResources - stats.deletedResources}`);
+  console.log(`  Resource locked: ${stats.lockedResources}`);
+  console.log(`  Resource failed to delete: ${stats.toDeleteResources - states.lockedResources - stats.deletedResources}`);
   console.log(`  Resource group processed: ${stats.totalGroups}`);
   console.log(`  Resource group can be deleted: ${stats.toDeleteGroups}`);
   console.log(`  Resource group deleted: ${stats.deletedGroups}`);
-  console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.deletedGroups}`);
+  console.log(`  Resource group locked: ${stats.lockedGroups}`);
+  console.log(`  Resource group failed to delete: ${stats.toDeleteGroups - stats.lockedGroups - stats.deletedGroups}`);
   console.log(`  Following resources are in the exclude list:`);
   excludedResources.forEach(r => console.log(`    ${r}`));
 
   // fail the program if any delete failed
-  if (stats.toDeleteResources !== stats.deletedResources || stats.toDeleteGroups !== stats.deletedGroups) process.exitCode = 1;
+  if (stats.toDeleteResources !== stats.deletedResources + stats.lockedResources || stats.toDeleteGroups !== stats.deletedGroups + stats.lockedGroups) process.exitCode = 400;
+  else if (stats.lockedResources !== 0 || stats.lockedGroups) process.exitCode = 409;
 }
 
 if (process.argv.length < 6) {
@@ -131,5 +138,5 @@ const tenantId = process.argv[8];
 
 doCleanup(subscriptionId, subscriptionName, ttl, excludeList, clientId, clientSecret, tenantId).catch(ex => {
   console.log(ex);
-  process.exitCode = 1;
+  process.exitCode = 500;
 });
