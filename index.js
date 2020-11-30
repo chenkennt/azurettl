@@ -107,7 +107,7 @@ async function doCleanupCore(subsId, subsName, ttl, excludeList, cred) {
   console.log(`  Resource can be deleted: ${stats.toDeleteResources}`);
   console.log(`  Resource deleted: ${stats.deletedResources}`);
   console.log(`  Resource locked: ${stats.lockedResources}`);
-  console.log(`  Resource failed to delete: ${stats.toDeleteResources - states.lockedResources - stats.deletedResources}`);
+  console.log(`  Resource failed to delete: ${stats.toDeleteResources - stats.lockedResources - stats.deletedResources}`);
   console.log(`  Resource group processed: ${stats.totalGroups}`);
   console.log(`  Resource group can be deleted: ${stats.toDeleteGroups}`);
   console.log(`  Resource group deleted: ${stats.deletedGroups}`);
